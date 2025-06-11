@@ -19,61 +19,7 @@ This Terraform module sets up a Kubernetes EKS cluster using Karpenter for autos
 - AWS CLI authenticated with necessary permissions
 
 ## High-Level Architecture Diagram
-+---------------------+
-|      End Users      |
-+---------+-----------+
-          |
-          v
-+---------------------+
-|    Route 53 / CDN   |
-+---------+-----------+
-          |
-          v
-+---------------------+
-|      AWS WAF        |
-+---------+-----------+
-          |
-          v
-+---------------------+
-|  Application Load   |
-|     Balancer (ALB)  |
-+---------+-----------+
-          |
-+---------------------+
-|  Amazon EKS Cluster |  
-+---------+-----------+
-          |
-  +-------+--------+
-  |                |
-  v                v
-Frontend Pod   Backend Pod
- (React SPA)    (Flask API)
-    |                |
-    |                v
-    |       +-----------------+
-    |       | Amazon RDS (PG) |
-    |       +-----------------+
-    |                ^
-    |                |
-    v         +-------------+
-Secrets ----> | Secrets      |
-Manager       | Manager (IRSA)|
-              +-------------+
-    |
-    v
-+------------------------+
-|  CI/CD (GitHub Actions)|
-| - Build/Test/Deploy    |
-| - Push to ECR          |
-+------------------------+
-          |
-          v
-+------------------------+
-| Amazon ECR (Images)    |
-+------------------------+
-          |
-          v
-+------------------------+
+<pre> +-------------------+ | End Users | +--------+----------+ | v +-------------------+ | Route 53 / CDN | +--------+----------+ | v +-----------+ | AWS WAF | +-----+-----+ | v +---------------------+ | Application Load | | Balancer (ALB) | +----------+----------+ | +---------------------+----------------------+ | | v v +---------------+ +----------------+ | Frontend Pod | | Backend Pod | | (React SPA) | | (Flask API) | +---------------+ +--------+-------+ | | | v | +------------------+ | | Amazon RDS PG | | +--------+---------+ | ^ v | +-----------------+ +--------------+ | AWS Secrets |<-------------------------| IRSA (IAM) | | Manager | +--------------+ +-----------------+ +-----------------------------+ | CI/CD (GitHub Actions) | | - Build/Test/Deploy | | - Push to ECR | +--------------+--------------+ | v +------------------+ | Amazon ECR | +--------+---------+ | v +-------------------------------+ | Karpenter-managed EC2 Nodes | | (Graviton + Spot + x86) | +-------------------------------+ Monitoring & Logs: - CloudWatch - Prometheus/Grafana </pre>
 
 ## Usage
 
