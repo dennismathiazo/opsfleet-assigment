@@ -58,9 +58,24 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
   vpc_id     = module.vpc.vpc_id
 
-  eks_managed_node_groups = {}
-
   enable_irsa = true
+
+# EKS Managed Node Group(s)
+  eks_managed_node_group_defaults = {
+    instance_types = ["t3.medium", "m5.large", "t4g.medium", "m6g.large"]
+  }
+
+  eks_managed_node_groups = {
+    karpenter = {
+      ami_type       = "AL2023_x86_64_STANDARD"
+      instance_types = ["t3.medium","m5.large"]
+
+      min_size     = 2
+      max_size     = 10
+      desired_size = 2
+    }
+  }
+
   tags = {
     Environment = "dev"
     Terraform   = "true"
@@ -73,7 +88,7 @@ module "karpenter" {
   cluster_name = module.eks.cluster_name
 
   create_node_iam_role = false
-  node_iam_role_arn    = module.eks.eks_managed_node_groups["initial"].iam_role_arn
+  node_iam_role_arn    = module.eks.eks_managed_node_groups["karpenter"].iam_role_arn
 
   # Since the node group role will already have an access entry
   create_access_entry = false
